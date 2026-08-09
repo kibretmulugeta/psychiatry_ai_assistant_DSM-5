@@ -1,14 +1,14 @@
 # Render Infrastructure-as-Code Deployment Blueprint
-# Project: Personal Website AI Assistant - Digital Twin (Alemu Kibret Mulugeta)
+# Project: DSM-5 Psychiatry & Clinical Psychology AI Assistant
 
 services:
   # 1. FastAPI Backend Service
   - type: web
-    name: digital-twin-backend
+    name: psychiatry-dsm5-backend
     env: python
     region: oregon
     plan: starter
-    buildCommand: "pip install -r requirements.txt"
+    buildCommand: "pip install -r requirements.txt && python scripts/ingest_knowledge_base.py"
     startCommand: "uvicorn apps.backend.app.main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /api/v1/health/liveness
     envVars:
@@ -26,30 +26,18 @@ services:
         generateValue: true
       - key: DATABASE_URL
         fromDatabase:
-          name: digital-twin-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: digital-twin-redis
+          name: psychiatry-dsm5-db
           property: connectionString
       - key: ACTIVE_LLM_PROVIDER
-        value: google_gemini
+        value: groq
       - key: ACTIVE_EMBEDDING_PROVIDER
         value: openai
 
 databases:
   # 2. PostgreSQL Database with pgvector extension support
-  - name: digital-twin-db
-    databaseName: digital_twin
+  - name: psychiatry-dsm5-db
+    databaseName: dsm5_psychiatry
     user: postgres
     region: oregon
     plan: starter
     postgresMajorVersion: "16"
-
-# 3. Redis Cache & Rate Limiting Service
-redis:
-  - name: digital-twin-redis
-    region: oregon
-    plan: starter
-    maxmemoryPolicy: allkeys-lru
