@@ -1,12 +1,11 @@
 /* ==========================================================================
-   Personal Website AI Assistant - Embeddable Floating Chat Widget Stylesheet
-   Digital Twin of Alemu Kibret Mulugeta
+   DSM-5 Psychiatry & Clinical Psychology AI Assistant Widget Stylesheet
    ========================================================================== */
 
 :root {
   --wa-primary: #6366f1;
   --wa-primary-hover: #4f46e5;
-  --wa-bg-glass: rgba(15, 23, 42, 0.85);
+  --wa-bg-glass: rgba(15, 23, 42, 0.88);
   --wa-bg-card: #1e293b;
   --wa-text-main: #f8fafc;
   --wa-text-muted: #94a3b8;
@@ -21,7 +20,7 @@
 }
 
 [data-theme="light"] {
-  --wa-bg-glass: rgba(255, 255, 255, 0.9);
+  --wa-bg-glass: rgba(255, 255, 255, 0.95);
   --wa-bg-card: #ffffff;
   --wa-text-main: #0f172a;
   --wa-text-muted: #64748b;
@@ -96,14 +95,8 @@
 }
 
 @keyframes waRingExpand {
-  0% {
-    transform: scale(0.9);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.65);
-    opacity: 0;
-  }
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1.65); opacity: 0; }
 }
 
 /* Teaser Speech Bubble */
@@ -166,22 +159,12 @@
   height: 28px;
   fill: currentColor;
 }
-.wa-badge {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 14px;
-  height: 14px;
-  background-color: #10b981;
-  border: 2px solid #0f172a;
-  border-radius: 50%;
-}
 
 /* Chat Window Panel */
 .wa-chat-panel {
   display: none;
-  width: 380px;
-  height: 580px;
+  width: 400px;
+  height: 600px;
   max-width: calc(100vw - 32px);
   max-height: calc(100vh - 100px);
   background: var(--wa-bg-glass);
@@ -209,7 +192,7 @@
 /* Header */
 .wa-header {
   padding: 16px 20px;
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(30, 41, 59, 0.85);
   border-bottom: 1px solid var(--wa-border);
   display: flex;
   align-items: center;
@@ -224,13 +207,11 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--wa-primary);
+  background: linear-gradient(135deg, #6366f1, #a855f7);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  color: white;
-  font-size: 14px;
+  font-size: 18px;
 }
 .wa-title {
   font-size: 15px;
@@ -240,7 +221,7 @@
 }
 .wa-subtitle {
   font-size: 12px;
-  color: var(--wa-text-muted);
+  color: #818cf8;
   margin: 0;
 }
 .wa-header-actions {
@@ -264,7 +245,7 @@
 /* Body / Message List */
 .wa-body {
   flex: 1;
-  padding: 20px;
+  padding: 16px 20px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -274,7 +255,7 @@
 .wa-message {
   display: flex;
   flex-direction: column;
-  max-width: 85%;
+  max-width: 88%;
   animation: waFadeIn 0.2s ease-in;
 }
 @keyframes waFadeIn {
@@ -302,8 +283,8 @@
 
 .wa-bubble {
   padding: 12px 16px;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13.5px;
+  line-height: 1.55;
   word-break: break-word;
 }
 .wa-bubble p { margin: 0 0 8px 0; }
@@ -313,82 +294,62 @@
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
-/* Code block markdown rendering */
-.wa-code-block {
-  background: #0f172a;
-  border: 1px solid var(--wa-border);
-  border-radius: 8px;
-  margin: 10px 0;
-  overflow: hidden;
-}
-.wa-code-header {
-  background: #1e293b;
-  padding: 6px 12px;
-  font-size: 12px;
-  color: var(--wa-text-muted);
+/* Quick Suggestion Chips */
+.wa-suggestions {
+  padding: 8px 14px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.wa-copy-btn {
-  background: transparent;
-  border: 1px solid var(--wa-border);
-  color: var(--wa-text-muted);
-  padding: 2px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 11px;
-}
-.wa-copy-btn:hover {
-  color: white;
-  background: var(--wa-primary);
-}
-.wa-code-content {
-  padding: 12px;
+  gap: 6px;
   overflow-x: auto;
-  font-family: 'Fira Code', Consolas, Monaco, monospace;
-  font-size: 13px;
-  color: #e2e8f0;
-  margin: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.5);
+}
+.wa-sugg-chip {
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.wa-sugg-chip:hover {
+  background: rgba(99, 102, 241, 0.25);
+  color: white;
+  border-color: #818cf8;
+}
+.wa-sugg-crisis {
+  background: rgba(225, 29, 72, 0.15);
+  color: #fca5a5;
+  border-color: rgba(225, 29, 72, 0.3);
+}
+.wa-sugg-crisis:hover {
+  background: #e11d48;
+  color: white;
 }
 
-/* Action Cards & Buttons */
+/* Action Cards */
 .wa-action-card {
   margin-top: 10px;
   padding: 12px;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.7);
   border: 1px solid var(--wa-primary);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-.wa-action-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--wa-text-main);
-}
-.wa-btn {
-  background: var(--wa-primary);
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   gap: 6px;
-  transition: background 0.2s;
+  font-size: 12.5px;
 }
-.wa-btn:hover {
-  background: var(--wa-primary-hover);
+.wa-card-title {
+  font-weight: 600;
+  color: #818cf8;
+}
+.wa-card-rec {
+  color: #34d399;
 }
 
 /* Typing animation */
@@ -414,7 +375,7 @@
 /* Input Footer */
 .wa-footer {
   padding: 12px 14px;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--wa-border);
   display: flex;
@@ -448,7 +409,7 @@ textarea#wa-chat-input {
   box-shadow: none !important;
   color: #f8fafc !important;
   font-family: var(--wa-font);
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.4;
   resize: none !important;
   max-height: 90px;
@@ -482,14 +443,4 @@ textarea#wa-chat-input::placeholder {
   transform: scale(1.08);
   background: linear-gradient(135deg, #4f46e5, #4338ca);
   box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
-}
-
-.wa-send-btn:active {
-  transform: scale(0.95);
-}
-
-.wa-send-btn svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
 }

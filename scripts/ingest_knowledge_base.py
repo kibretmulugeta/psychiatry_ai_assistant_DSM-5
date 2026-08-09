@@ -1,15 +1,14 @@
 """
-Knowledge Base Ingestion Script.
-Parses, chunks, embeds, and stores all documents in knowledge_base/ into PostgreSQL / Supabase vector store
-with fallback for offline local execution.
+DSM-5 Psychiatry Knowledge Base Ingestion Script.
+Parses, chunks, embeds, and indexes all DSM-5 clinical documents in knowledge_base/ into vector store.
 """
 
 import asyncio
 import sys
 import sqlite3
 import json
-import hashlib
 from pathlib import Path
+import uuid
 
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -22,20 +21,21 @@ from packages.rag.embeddings.factory import EmbeddingFactory
 
 
 async def run_ingestion() -> None:
-    """Ingest, chunk, embed, and index all files in knowledge_base/."""
+    """Ingest, chunk, embed, and index all DSM-5 files in knowledge_base/."""
     print("=" * 65)
-    print("STARTING DIGITAL TWIN KNOWLEDGE BASE INGESTION PIPELINE")
+    print("STARTING DSM-5 PSYCHIATRY KNOWLEDGE BASE INGESTION PIPELINE")
     print("=" * 65)
 
-    db_url = settings.DATABASE_URL
-    print(f"Targeting Database: {db_url.split('@')[-1] if '@' in db_url else db_url}")
-
-    # Initialize local SQLite index database
     db_path = "knowledge_base.sqlite"
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+    
+    # Clean recreate of tables for fresh DSM-5 indexing
+    cursor.execute("DROP TABLE IF EXISTS document_chunks")
+    cursor.execute("DROP TABLE IF EXISTS documents")
+    
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS documents (
+        CREATE TABLE documents (
             id TEXT PRIMARY KEY,
             filename TEXT UNIQUE,
             file_type TEXT,
@@ -44,7 +44,7 @@ async def run_ingestion() -> None:
         )
     """)
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS document_chunks (
+        CREATE TABLE document_chunks (
             id TEXT PRIMARY KEY,
             document_id TEXT,
             chunk_index INTEGER,
@@ -54,7 +54,7 @@ async def run_ingestion() -> None:
         )
     """)
     conn.commit()
-    print("[OK] Knowledge Base vector index initialized.")
+    print("[OK] DSM-5 Knowledge Base vector database schema initialized.")
 
     kb_dir = Path("knowledge_base")
     if not kb_dir.exists():
@@ -62,7 +62,7 @@ async def run_ingestion() -> None:
         return
 
     files = list(kb_dir.glob("*"))
-    print(f"\nDiscovered {len(files)} knowledge base documents:")
+    print(f"\nDiscovered {len(files)} DSM-5 clinical reference documents:")
     for f in sorted(files):
         print(f"  - {f.name}")
 
@@ -74,7 +74,6 @@ async def run_ingestion() -> None:
     total_docs = 0
     total_chunks = 0
 
-    import uuid
     for file_path in sorted(files):
         if file_path.is_dir():
             continue
@@ -94,7 +93,7 @@ async def run_ingestion() -> None:
 
         doc_id = str(uuid.uuid4())
         cursor.execute(
-            "INSERT OR REPLACE INTO documents (id, filename, file_type, checksum) VALUES (?, ?, ?, ?)",
+            "INSERT INTO documents (id, filename, file_type, checksum) VALUES (?, ?, ?, ?)",
             (doc_id, parsed_doc.filename, parsed_doc.file_type, parsed_doc.checksum)
         )
 
@@ -112,17 +111,16 @@ async def run_ingestion() -> None:
         conn.commit()
         total_docs += 1
         total_chunks += len(text_chunks)
-        print(f"   [OK] Parsed & Checksum verified (SHA256: {parsed_doc.checksum[:12]}...)")
-        print(f"   [OK] Indexed Document ID: {doc_id}")
-        print(f"   [OK] Generated & embedded {len(text_chunks)} vector chunks (1536-dim).")
+        print(f"   [OK] Checksum verified (SHA256: {parsed_doc.checksum[:12]}...)")
+        print(f"   [OK] Generated & embedded {len(text_chunks)} vector chunks.")
 
     conn.close()
 
     print("\n" + "=" * 65)
-    print("KNOWLEDGE BASE INGESTION PIPELINE EXECUTED SUCCESSFULLY!")
-    print(f"Total Documents Ingested: {total_docs}")
+    print("DSM-5 KNOWLEDGE BASE INGESTION PIPELINE COMPLETED SUCCESSFULLY!")
+    print(f"Total DSM-5 Clinical Documents Ingested: {total_docs}")
     print(f"Total Vector Chunks Stored: {total_chunks}")
-    print("Vector Index Database: knowledge_base.sqlite (pgvector compatible)")
+    print(f"Vector Database File: {db_path}")
     print("=" * 65)
 
 

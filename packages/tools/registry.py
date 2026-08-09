@@ -1,42 +1,35 @@
 """
-Central Tool Registry managing tool registration and execution lookup.
+Central Tool Registry managing tool registration and execution lookup for psychiatric tools.
 """
 
 from typing import Any, Dict, List, Optional
 from packages.tools.base import BaseTool, ToolResult
-from packages.tools.contact_tools import (
-    OpenSocialProfileTool,
-    ScheduleMeetingTool,
-    SubmitContactFormTool,
+from packages.tools.psychiatric_tools import (
+    ClinicalSummaryReportTool,
+    DSM5CodeLookupTool,
+    EpidemiologyStatsTool,
+    GAD7AssessmentTool,
+    PCL5AssessmentTool,
+    PHQ9AssessmentTool,
 )
-from packages.tools.project_tools import (
-    FetchGitHubRepositoryTool,
-    FetchProjectDemoTool,
-    GetLatestPublicationsTool,
-    ListProjectsTool,
-)
-from packages.tools.resume_tools import DownloadCVTool, DownloadResumeTool
 
 
 class ToolRegistry:
-    """Registry maintaining active action tools for Function Calling."""
+    """Registry maintaining active action tools for Psychiatric Function Calling."""
 
     def __init__(self) -> None:
         self._tools: Dict[str, BaseTool] = {}
         self._register_default_tools()
 
     def _register_default_tools(self) -> None:
-        """Register built-in system tools."""
+        """Register built-in psychiatric decision tools."""
         tools: List[BaseTool] = [
-            DownloadResumeTool(),
-            DownloadCVTool(),
-            ListProjectsTool(),
-            FetchProjectDemoTool(),
-            FetchGitHubRepositoryTool(),
-            GetLatestPublicationsTool(),
-            SubmitContactFormTool(),
-            ScheduleMeetingTool(),
-            OpenSocialProfileTool(),
+            PHQ9AssessmentTool(),
+            GAD7AssessmentTool(),
+            PCL5AssessmentTool(),
+            DSM5CodeLookupTool(),
+            EpidemiologyStatsTool(),
+            ClinicalSummaryReportTool(),
         ]
         for t in tools:
             self._tools[t.name] = t
@@ -52,7 +45,7 @@ class ToolRegistry:
             return ToolResult(
                 success=False,
                 tool_name=name,
-                message=f"Requested tool '{name}' is not registered.",
+                message=f"Requested tool '{name}' is not registered in ToolRegistry.",
             )
         return await tool.execute(**kwargs)
 

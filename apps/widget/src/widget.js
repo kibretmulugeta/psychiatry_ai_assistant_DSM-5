@@ -1,6 +1,5 @@
 /**
- * Personal Website AI Assistant - Embeddable Floating Widget
- * Digital Twin of Kibret Mulugeta
+ * DSM-5 Psychiatry & Clinical Psychology AI Assistant - Embeddable Widget
  * Version: 1.0.0
  */
 
@@ -10,11 +9,11 @@
   var WebsiteAssistant = {
     config: {
       apiKey: '',
-      apiEndpoint: 'http://localhost:8000/api/v1',
+      apiEndpoint: '/api/v1',
       theme: 'dark',
       position: 'bottom-right',
       primaryColor: '#6366f1',
-      welcomeMessage: "Hello! I am the AI Digital Twin of Kibret Mulugeta. Ask me about Kibret's research, projects, skills, or download his resume!",
+      welcomeMessage: "Hello! I am **DSM-5 PsychAssist AI**. I provide diagnostic criteria guidance, differential diagnosis pathways, epidemiology statistics, and psychometric tools (PHQ-9, GAD-7) based on DSM-5 standards.",
     },
     state: {
       isOpen: false,
@@ -43,7 +42,7 @@
       var link = document.createElement('link');
       link.id = 'wa-widget-styles';
       link.rel = 'stylesheet';
-      link.href = this.config.apiEndpoint.replace('/api/v1', '') + '/widget.css';
+      link.href = '/widget.css';
       document.head.appendChild(link);
     },
 
@@ -56,10 +55,10 @@
         <div class="wa-chat-panel" id="wa-chat-panel">
           <div class="wa-header">
             <div class="wa-header-info">
-              <div class="wa-avatar">KM</div>
+              <div class="wa-avatar">🧠</div>
               <div>
-                <div class="wa-title">Kibret Mulugeta AI</div>
-                <div class="wa-subtitle">Digital Twin • Online</div>
+                <div class="wa-title">DSM-5 PsychAssist AI</div>
+                <div class="wa-subtitle">Psychiatry & Psychology decision support</div>
               </div>
             </div>
             <div class="wa-header-actions">
@@ -69,9 +68,17 @@
             </div>
           </div>
           <div class="wa-body" id="wa-chat-body"></div>
+          <div class="wa-suggestions" id="wa-suggestions">
+            <button class="wa-sugg-chip" data-query="Major Depressive Disorder DSM-5 Criteria">Depression Criteria</button>
+            <button class="wa-sugg-chip" data-query="Evaluate PHQ-9 Depression scale score">PHQ-9 Tool</button>
+            <button class="wa-sugg-chip" data-query="Evaluate GAD-7 Anxiety scale score">GAD-7 Tool</button>
+            <button class="wa-sugg-chip" data-query="Bipolar I vs Bipolar II differential diagnosis">Bipolar I vs II</button>
+            <button class="wa-sugg-chip" data-query="Schizophrenia epidemiology and prevalence statistics">Prevalence Stats</button>
+            <button class="wa-sugg-chip wa-sugg-crisis" data-query="Emergency crisis safety support hotlines">🚨 Crisis Hotline</button>
+          </div>
           <div class="wa-footer">
             <div class="wa-input-wrapper">
-              <textarea id="wa-chat-input" class="wa-chat-input" placeholder="Ask about research, projects, skills..." rows="1"></textarea>
+              <textarea id="wa-chat-input" class="wa-chat-input" placeholder="Ask about DSM-5 criteria, PHQ-9, GAD-7, statistics..." rows="1"></textarea>
               <button id="wa-send-btn" class="wa-send-btn" aria-label="Send message">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
               </button>
@@ -79,7 +86,7 @@
           </div>
         </div>
         <div class="wa-teaser-bubble" id="wa-teaser-bubble">
-          <span class="wa-teaser-text">Ask Kibret's AI Twin anything! 👋</span>
+          <span class="wa-teaser-text">Ask DSM-5 PsychAssist AI 👋</span>
           <button class="wa-teaser-close" id="wa-teaser-close" aria-label="Close bubble">✕</button>
         </div>
         <button class="wa-toggle-btn wa-pulsing" id="wa-toggle-btn" aria-label="Open AI Assistant">
@@ -100,6 +107,7 @@
       this.elements.body = container.querySelector('#wa-chat-body');
       this.elements.input = container.querySelector('#wa-chat-input');
       this.elements.sendBtn = container.querySelector('#wa-send-btn');
+      this.elements.suggestions = container.querySelector('#wa-suggestions');
 
       this.initAttentionTimer();
     },
@@ -146,6 +154,16 @@
       self.elements.sendBtn.addEventListener('click', function () {
         self.handleSend();
       });
+
+      if (self.elements.suggestions) {
+        self.elements.suggestions.addEventListener('click', function (e) {
+          var chip = e.target.closest('.wa-sugg-chip');
+          if (chip && chip.dataset.query) {
+            self.elements.input.value = chip.dataset.query;
+            self.handleSend();
+          }
+        });
+      }
 
       self.elements.input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -228,7 +246,7 @@
           if (typingDiv && typingDiv.parentNode) {
             self.elements.body.removeChild(typingDiv);
           }
-          self.appendMessage('assistant', 'Sorry, I encountered an issue connecting to the AI Digital Twin service.');
+          self.appendMessage('assistant', 'Sorry, I encountered an issue connecting to the DSM-5 PsychAssist AI backend.');
           self.state.isStreaming = false;
         });
     },
@@ -284,7 +302,6 @@
         es.onerror = function () {
           es.close();
           if (!responseBubble) {
-            // Fallback to standard POST request if SSE fails or buffers on Vercel
             self.fetchFallbackResponse(query, typingDiv);
           } else {
             self.state.isStreaming = false;
@@ -301,24 +318,22 @@
       var card = document.createElement('div');
       card.className = 'wa-action-card';
 
-      if (action.name === 'download_resume' || action.name === 'download_cv') {
-        var url = (action.data && action.data.download_url) ? action.data.download_url : 'https://interactive-portfolio-pied-three.vercel.app/api/resume/download';
+      if (action.name === 'assess_phq9' || action.name === 'assess_gad7' || action.name === 'assess_pcl5') {
+        var toolData = action.data || {};
         card.innerHTML = `
-          <div class="wa-card-title">📄 Professional Resume / CV</div>
-          <div class="wa-card-desc">Click below to download Kibret Mulugeta's official resume PDF.</div>
-          <a href="${url}" target="_blank" rel="noopener noreferrer" class="wa-btn-primary">Download Resume (PDF)</a>
+          <div class="wa-card-title">📝 Psychometric Assessment Result</div>
+          <div class="wa-card-desc"><strong>Tool:</strong> ${toolData.tool || action.name}<br><strong>Score:</strong> ${toolData.score !== undefined ? toolData.score : 'N/A'}<br><strong>Severity:</strong> ${toolData.severity_level || toolData.interpretation || 'Evaluated'}</div>
+          <div class="wa-card-rec"><strong>Recommendation:</strong> ${toolData.clinical_recommendation || toolData.recommendation || 'Clinical review recommended.'}</div>
         `;
-      } else if (action.name === 'submit_contact_form') {
+      } else if (action.name === 'lookup_dsm5_code') {
         card.innerHTML = `
-          <div class="wa-card-title">✉️ Get in Touch</div>
-          <div class="wa-card-desc">Send an email directly to Kibret Mulugeta.</div>
-          <a href="mailto:Kibretmail@gmail.com" class="wa-btn-primary">Send Email</a>
+          <div class="wa-card-title">🔍 DSM-5 Diagnostic Code Lookup</div>
+          <div class="wa-card-desc">${action.message || 'Diagnostic code records retrieved.'}</div>
         `;
-      } else if (action.name === 'list_projects') {
+      } else if (action.name === 'get_epidemiology_stats') {
         card.innerHTML = `
-          <div class="wa-card-title">💻 Explore Projects</div>
-          <div class="wa-card-desc">Visit Kibret Mulugeta's GitHub repositories and interactive portfolio.</div>
-          <a href="https://github.com/kibretmulugeta" target="_blank" rel="noopener noreferrer" class="wa-btn-primary">View GitHub Profile</a>
+          <div class="wa-card-title">📊 Empirical Epidemiology Data</div>
+          <div class="wa-card-desc">${action.message || 'Prevalence statistics retrieved.'}</div>
         `;
       } else {
         return;

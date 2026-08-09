@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     )
 
     # App Metadata
-    APP_NAME: str = Field(default="Kibret Mulugeta Digital Twin AI")
+    APP_NAME: str = Field(default="DSM-5 Psychiatry & Clinical Psychology AI Assistant")
     APP_ENV: Literal["development", "staging", "production", "testing"] = Field(
         default="development"
     )
@@ -38,7 +38,7 @@ class Settings(BaseSettings):
 
     # Database & Storage
     DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://postgres:postgres@localhost:5432/digital_twin"
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/dsm5_psychiatry"
     )
     REDIS_URL: str = Field(default="redis://localhost:6379/0")
 
