@@ -45,16 +45,35 @@ async def chat_message(
     tokens_used = 0
     sources_payload = []
 
+    history_msgs = [LLMMessage(role=m.role, content=m.content) for m in (request.history or [])]
     if decision.action_name or decision.route == "ACTION":
         action_res = await action_agent.process(
             input_text=request.message,
             action_name=decision.action_name,
             action_args=decision.action_args,
         )
-        response_text = action_res.message
-        action_payload = {"action_name": action_res.action_name, "data": action_res.data}
+        if action_res.success:
+            response_text = action_res.message
+            action_payload = {"action_name": action_res.action_name, "data": action_res.data}
+        else:
+            know_res = await knowledge_agent.process(
+                input_text=request.message,
+                history=history_msgs,
+                session=db,
+            )
+            response_text = know_res.content
+            tokens_used = know_res.tokens_used
+            sources_payload = [
+                SourceAttributionSchema(
+                    document_id=s.document_id,
+                    filename=s.filename,
+                    chunk_index=s.chunk_index,
+                    similarity_score=s.similarity_score,
+                    snippet=s.snippet,
+                )
+                for s in know_res.sources
+            ]
     else:
-        history_msgs = [LLMMessage(role=m.role, content=m.content) for m in (request.history or [])]
         know_res = await knowledge_agent.process(
             input_text=request.message,
             history=history_msgs,
@@ -72,18 +91,6 @@ async def chat_message(
             )
             for s in know_res.sources
         ]
-
-    # Attempt assistant message persistence if DB is connected
-    if conversation:
-        try:
-            await msg_repo.create(
-                conversation_id=conversation.id,
-                role="assistant",
-                content=response_text,
-                tokens_used=tokens_used,
-            )
-        except Exception:
-            pass
 
     return ChatResponse(
         response=response_text,
@@ -115,19 +122,23 @@ async def chat_stream(
         }
         yield f"data: {json.dumps(meta_event)}\n\n"
 
+        handled_action = False
         if decision.action_name or decision.route == "ACTION":
             action_res = await action_agent.process(
                 input_text=message,
                 action_name=decision.action_name,
                 action_args=decision.action_args,
             )
-            data_event = {
-                "type": "content",
-                "delta": action_res.message,
-                "action": {"name": action_res.action_name, "data": action_res.data},
-            }
-            yield f"data: {json.dumps(data_event)}\n\n"
-        else:
+            if action_res.success:
+                handled_action = True
+                data_event = {
+                    "type": "content",
+                    "delta": action_res.message,
+                    "action": {"name": action_res.action_name, "data": action_res.data},
+                }
+                yield f"data: {json.dumps(data_event)}\n\n"
+
+        if not handled_action:
             async for token in knowledge_agent.process_stream(input_text=message):
                 chunk_event = {"type": "content", "delta": token}
                 yield f"data: {json.dumps(chunk_event)}\n\n"
