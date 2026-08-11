@@ -28,8 +28,9 @@ class ActionAgent(BaseAgent):
         **kwargs: Any,
     ) -> ActionResult:
         """Execute specified action or resolve tool call."""
-        action = action_name or "download_resume"
-        args = action_args or {}
+        action = action_name or "assess_phq9"
+        args = dict(action_args or {})
+        args["input_text"] = input_text
 
         res = await tool_registry.execute_tool(action, **args)
         return ActionResult(
