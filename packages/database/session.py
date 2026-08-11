@@ -14,7 +14,7 @@ from apps.backend.app.core.config import settings
 import os
 from pathlib import Path
 
-db_url = settings.DATABASE_URL
+db_url = (settings.DATABASE_URL or "").strip("\"' \t\r\n")
 is_vercel = "VERCEL" in os.environ or "VERCEL_ENV" in os.environ
 
 if is_vercel and ("localhost" in db_url or "127.0.0.1" in db_url):

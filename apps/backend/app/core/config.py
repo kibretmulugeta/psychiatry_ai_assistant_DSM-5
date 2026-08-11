@@ -3,7 +3,7 @@ Configuration management module using Pydantic v2 BaseSettings.
 Loads environment variables and enforces typing and validation rules.
 """
 
-from typing import List, Literal, Optional
+from typing import Any, List, Literal, Optional
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
