@@ -30,28 +30,13 @@ router = APIRouter(prefix="/chat", tags=["Chat & Streaming"])
 @router.post("/message", response_model=ChatResponse, status_code=status.HTTP_200_OK)
 async def chat_message(
     request: ChatRequest,
-    db: AsyncSession = Depends(get_db_session),
     router_agent: RouterAgent = Depends(get_router_agent),
     knowledge_agent: KnowledgeAgent = Depends(get_knowledge_agent),
     action_agent: ActionAgent = Depends(get_action_agent),
 ) -> ChatResponse:
     """Standard REST Chat Endpoint. Classifies intent and routes to Knowledge or Action Agent."""
     session_id = request.session_id or f"sess_{uuid.uuid4().hex[:12]}"
-
-    # Attempt optional DB persistence if DB is connected
-    try:
-        conv_repo = ConversationRepository(session=db)
-        msg_repo = MessageRepository(session=db)
-        conversation = await conv_repo.get_by_session_id(session_id)
-        if not conversation:
-            conversation = await conv_repo.create(session_id=session_id, title="Chat Session")
-        await msg_repo.create(
-            conversation_id=conversation.id,
-            role="user",
-            content=request.message,
-        )
-    except Exception:
-        conversation = None
+    db = None
 
     decision = await router_agent.process(input_text=request.message)
 
