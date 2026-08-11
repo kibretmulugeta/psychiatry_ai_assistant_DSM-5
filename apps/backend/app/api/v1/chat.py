@@ -45,7 +45,7 @@ async def chat_message(
     tokens_used = 0
     sources_payload = []
 
-    if decision.route == "ACTION":
+    if decision.action_name or decision.route == "ACTION":
         action_res = await action_agent.process(
             input_text=request.message,
             action_name=decision.action_name,
@@ -115,10 +115,11 @@ async def chat_stream(
         }
         yield f"data: {json.dumps(meta_event)}\n\n"
 
-        if decision.route == "ACTION":
+        if decision.action_name or decision.route == "ACTION":
             action_res = await action_agent.process(
                 input_text=message,
                 action_name=decision.action_name,
+                action_args=decision.action_args,
             )
             data_event = {
                 "type": "content",
