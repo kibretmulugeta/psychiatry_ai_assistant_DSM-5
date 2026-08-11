@@ -67,7 +67,7 @@ class GeminiAdapter(BaseLLMAdapter):
                 model_name=self.model_name,
             )
 
-        candidate_models = [self.model_name, "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"]
+        candidate_models = [self.model_name, "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]
         candidate_models = list(dict.fromkeys(candidate_models))
 
         payload = self._build_payload(messages, temperature, max_tokens, system_prompt)
@@ -133,7 +133,7 @@ class GeminiAdapter(BaseLLMAdapter):
                 yield token + " "
             return
 
-        candidate_models = ["gemini-2.0-flash", self.model_name, "gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"]
+        candidate_models = ["gemini-2.0-flash", self.model_name, "gemini-1.5-flash", "gemini-1.5-flash-8b"]
         candidate_models = list(dict.fromkeys(candidate_models))
 
         for model in candidate_models:

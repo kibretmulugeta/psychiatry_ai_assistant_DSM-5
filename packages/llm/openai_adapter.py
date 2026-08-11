@@ -66,10 +66,28 @@ class OpenAIAdapter(BaseLLMAdapter):
                 return LLMResponse(content=content, tokens_used=tokens, model_name=self.model_name)
         except httpx.HTTPStatusError as e:
             from apps.backend.app.core.logging import get_logger
+            import os
+            from apps.backend.app.core.config import settings
             logger = get_logger("llm.openai")
-            logger.error(f"OpenAI API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
+            logger.error(f"OpenAI/Groq API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
+            
+            gemini_key = (
+                settings.GEMINI_API_KEY
+                or getattr(settings, "GOOGLE_API_KEY", None)
+                or getattr(settings, "GOOGLE_GEMINI_API_KEY", None)
+                or os.getenv("GEMINI_API_KEY")
+                or os.getenv("GOOGLE_API_KEY")
+                or os.getenv("GOOGLE_GEMINI_API_KEY")
+                or ""
+            )
+            if gemini_key and len(gemini_key.strip()) > 10:
+                logger.info("Automatically falling back to GeminiAdapter following LLM 401/403 HTTP error")
+                from packages.llm.gemini_adapter import GeminiAdapter
+                gemini_adapter = GeminiAdapter(api_key=gemini_key)
+                return await gemini_adapter.generate(messages=messages, system_prompt=system_prompt, **kwargs)
+
             return LLMResponse(
-                content=f"Unable to generate response (OpenAI API HTTP {e.response.status_code}). Please set ACTIVE_LLM_PROVIDER=google_gemini and GEMINI_API_KEY in your Vercel settings.",
+                content=f"Unable to generate response (LLM API HTTP {e.response.status_code}). Please check your API key configuration.",
                 tokens_used=0,
                 model_name=self.model_name,
             )
@@ -132,9 +150,29 @@ class OpenAIAdapter(BaseLLMAdapter):
                                 pass
         except httpx.HTTPStatusError as e:
             from apps.backend.app.core.logging import get_logger
+            import os
+            from apps.backend.app.core.config import settings
             logger = get_logger("llm.openai")
-            logger.error(f"OpenAI API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
-            fallback_text = f"Unable to generate response (OpenAI API HTTP {e.response.status_code}). Please set ACTIVE_LLM_PROVIDER=google_gemini and GEMINI_API_KEY in your Vercel settings."
+            logger.error(f"OpenAI/Groq API HTTP Error {e.response.status_code}: {e.response.text}", exc_info=True)
+
+            gemini_key = (
+                settings.GEMINI_API_KEY
+                or getattr(settings, "GOOGLE_API_KEY", None)
+                or getattr(settings, "GOOGLE_GEMINI_API_KEY", None)
+                or os.getenv("GEMINI_API_KEY")
+                or os.getenv("GOOGLE_API_KEY")
+                or os.getenv("GOOGLE_GEMINI_API_KEY")
+                or ""
+            )
+            if gemini_key and len(gemini_key.strip()) > 10:
+                logger.info("Automatically falling back to GeminiAdapter streaming following LLM 401/403 HTTP error")
+                from packages.llm.gemini_adapter import GeminiAdapter
+                gemini_adapter = GeminiAdapter(api_key=gemini_key)
+                async for token in gemini_adapter.stream(messages=messages, system_prompt=system_prompt, **kwargs):
+                    yield token
+                return
+
+            fallback_text = f"Unable to generate response (LLM API HTTP {e.response.status_code}). Please check your API key configuration."
             for token in fallback_text.split():
                 yield token + " "
         except Exception as e:
