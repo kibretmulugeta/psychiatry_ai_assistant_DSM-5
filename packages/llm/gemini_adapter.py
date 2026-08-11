@@ -97,10 +97,18 @@ class GeminiAdapter(BaseLLMAdapter):
                     )
             except httpx.HTTPStatusError as e:
                 from apps.backend.app.core.logging import get_logger
+                import os
+                from apps.backend.app.core.config import settings
                 logger = get_logger("llm.gemini")
                 err_text = e.response.text if hasattr(e.response, "text") else str(e)
                 logger.error(f"Gemini API HTTP Error {e.response.status_code}: {err_text}", exc_info=True)
                 if model == candidate_models[-1]:
+                    groq_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY") or ""
+                    if groq_key and len(groq_key.strip()) > 10:
+                        logger.info("Automatically falling back to GroqAdapter following Gemini API error")
+                        from packages.llm.groq_adapter import GroqAdapter
+                        groq_adapter = GroqAdapter(api_key=groq_key)
+                        return await groq_adapter.generate(messages=messages, system_prompt=system_prompt, **kwargs)
                     return LLMResponse(
                         content=f"Unable to generate response (Google Gemini API HTTP {e.response.status_code}). Please verify that GEMINI_API_KEY setting is valid.",
                         tokens_used=0,
@@ -108,9 +116,17 @@ class GeminiAdapter(BaseLLMAdapter):
                     )
             except Exception as e:
                 from apps.backend.app.core.logging import get_logger
+                import os
+                from apps.backend.app.core.config import settings
                 logger = get_logger("llm.gemini")
                 logger.error(f"Gemini LLM generation API error: {e}", exc_info=True)
                 if model == candidate_models[-1]:
+                    groq_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY") or ""
+                    if groq_key and len(groq_key.strip()) > 10:
+                        logger.info("Automatically falling back to GroqAdapter following Gemini exception")
+                        from packages.llm.groq_adapter import GroqAdapter
+                        groq_adapter = GroqAdapter(api_key=groq_key)
+                        return await groq_adapter.generate(messages=messages, system_prompt=system_prompt, **kwargs)
                     return LLMResponse(
                         content=f"I am unable to generate a response right now due to a Gemini provider connection error ({type(e).__name__}). Please check your GEMINI_API_KEY configuration.",
                         tokens_used=0,
@@ -162,6 +178,8 @@ class GeminiAdapter(BaseLLMAdapter):
                         return  # Success
             except httpx.HTTPStatusError as e:
                 from apps.backend.app.core.logging import get_logger
+                import os
+                from apps.backend.app.core.config import settings
                 logger = get_logger("llm.gemini")
                 try:
                     err_body = (await e.response.aread()).decode("utf-8", errors="ignore")
@@ -169,6 +187,15 @@ class GeminiAdapter(BaseLLMAdapter):
                     err_body = str(e)
                 logger.error(f"Gemini API HTTP Error {e.response.status_code}: {err_body}", exc_info=True)
                 if model == candidate_models[-1]:
+                    groq_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY") or ""
+                    if groq_key and len(groq_key.strip()) > 10:
+                        logger.info("Automatically falling back to GroqAdapter streaming following Gemini API error")
+                        from packages.llm.groq_adapter import GroqAdapter
+                        groq_adapter = GroqAdapter(api_key=groq_key)
+                        async for token in groq_adapter.stream(messages=messages, system_prompt=system_prompt, **kwargs):
+                            yield token
+                        return
+
                     if e.response.status_code == 429:
                         fallback_text = "Google Gemini API rate limit / quota exceeded (HTTP 429). Please try again in a few moments or use a key with available quota."
                     else:
@@ -178,9 +205,20 @@ class GeminiAdapter(BaseLLMAdapter):
                     return
             except Exception as e:
                 from apps.backend.app.core.logging import get_logger
+                import os
+                from apps.backend.app.core.config import settings
                 logger = get_logger("llm.gemini")
                 logger.error(f"Gemini LLM streaming API error: {e}", exc_info=True)
                 if model == candidate_models[-1]:
+                    groq_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY") or ""
+                    if groq_key and len(groq_key.strip()) > 10:
+                        logger.info("Automatically falling back to GroqAdapter streaming following Gemini exception")
+                        from packages.llm.groq_adapter import GroqAdapter
+                        groq_adapter = GroqAdapter(api_key=groq_key)
+                        async for token in groq_adapter.stream(messages=messages, system_prompt=system_prompt, **kwargs):
+                            yield token
+                        return
+
                     fallback_text = f"I am unable to generate a response right now due to a Gemini provider connection error ({type(e).__name__}). Please check your GEMINI_API_KEY configuration."
                     for token in fallback_text.split():
                         yield token + " "
