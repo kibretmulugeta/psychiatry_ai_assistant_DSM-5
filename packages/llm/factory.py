@@ -46,15 +46,15 @@ class LLMFactory:
         openrouter_key = settings.OPENROUTER_API_KEY or os.getenv("OPENROUTER_API_KEY") or ""
         openai_key = settings.OPENAI_API_KEY or os.getenv("OPENAI_API_KEY") or ""
 
-        if provider in ["google_gemini", "gemini"] or (gemini_key and (not groq_key or "your-" in groq_key)):
-            return GeminiAdapter(
-                model_name="gemini-2.0-flash",
-                api_key=gemini_key,
-            )
-        elif provider == "groq" or (groq_key and not provider):
+        if provider == "groq" or (groq_key and "gsk_" in groq_key):
             return GroqAdapter(
                 model_name="llama-3.3-70b-versatile",
                 api_key=groq_key,
+            )
+        elif provider in ["google_gemini", "gemini"]:
+            return GeminiAdapter(
+                model_name="gemini-2.0-flash",
+                api_key=gemini_key,
             )
         elif provider == "anthropic":
             return AnthropicAdapter(
