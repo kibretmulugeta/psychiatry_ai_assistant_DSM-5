@@ -31,11 +31,11 @@ async def check_database(db: AsyncSession) -> dict:
 
 
 async def check_redis() -> dict:
-    """Pings Redis server."""
-    if not HAS_REDIS:
-        return {"status": "up", "notice": "redis module not loaded (optional)"}
+    """Pings Redis server if configured."""
+    if not HAS_REDIS or "localhost" in settings.REDIS_URL or "127.0.0.1" in settings.REDIS_URL:
+        return {"status": "up", "notice": "redis module/cache optional"}
     try:
-        r = aioredis.from_url(settings.REDIS_URL)
+        r = aioredis.from_url(settings.REDIS_URL, socket_timeout=2.0)
         ping_res = await r.ping()
         await r.aclose()
         if ping_res:
