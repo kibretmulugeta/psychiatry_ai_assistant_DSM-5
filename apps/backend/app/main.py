@@ -198,9 +198,12 @@ def create_application() -> FastAPI:
           <div class="crisis-banner">
             <div class="crisis-text">
               <h4>🚨 Immediate Crisis & Safety Support</h4>
-              <p>If you or someone you know is in distress or experiencing suicidal ideation, help is available 24/7.</p>
+              <p>If you or someone you know is in distress or experiencing suicidal ideation, help is available 24/7 (Free & Confidential).</p>
             </div>
-            <a href="tel:988" class="crisis-btn">Call or Text 988</a>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <a href="tel:988" class="crisis-btn" onclick="window.open('https://988lifeline.org/chat/', '_blank')">Call or Text 988</a>
+              <a href="https://findahelpline.com/" target="_blank" rel="noopener" class="crisis-btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);">International Hotlines</a>
+            </div>
           </div>
 
           <script src="/widget.js"></script>

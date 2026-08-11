@@ -335,6 +335,15 @@
           <div class="wa-card-title">📊 Empirical Epidemiology Data</div>
           <div class="wa-card-desc">${action.message || 'Prevalence statistics retrieved.'}</div>
         `;
+      } else if (action.name === 'crisis_hotline') {
+        card.innerHTML = `
+          <div class="wa-card-title" style="color: #fda4af;">🚨 24/7 Immediate Crisis & Safety Support</div>
+          <div class="wa-card-desc" style="color: #fecdd3; margin-bottom: 10px;">Help is free, confidential, and available 24/7:</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="tel:988" style="background: #e11d48; color: white; border-radius: 6px; padding: 6px 12px; font-weight: 600; text-decoration: none; font-size: 0.82rem;" onclick="window.open('https://988lifeline.org/chat/', '_blank')">📞 Call / Text 988</a>
+            <a href="https://findahelpline.com/" target="_blank" rel="noopener" style="background: rgba(255,255,255,0.15); color: white; border-radius: 6px; padding: 6px 12px; font-weight: 500; text-decoration: none; font-size: 0.82rem;">🌍 International Hotlines</a>
+          </div>
+        `;
       } else {
         return;
       }

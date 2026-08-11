@@ -291,3 +291,36 @@ class ClinicalSummaryReportTool(BaseTool):
                 "timestamp": "Current Session",
             },
         )
+
+
+class EmergencyCrisisTool(BaseTool):
+    """Tool to provide immediate 24/7 emergency safety resources and crisis hotlines."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            name="crisis_hotline",
+            description="Provide immediate 24/7 crisis safety support numbers and suicide prevention hotlines.",
+        )
+
+    async def execute(self, **kwargs: Any) -> ToolResult:
+        message = (
+            "🚨 **IMMEDIATE CRISIS & SAFETY SUPPORT (24/7 FREE & CONFIDENTIAL)**\n\n"
+            "If you or someone you know is in distress, experiencing suicidal ideation, or in need of immediate help:\n\n"
+            "• 📞 **988 Suicide & Crisis Lifeline**: Call or Text **988** (US & Canada, available 24/7)\n"
+            "• 💬 **988 Online Web Chat**: [https://988lifeline.org/chat/](https://988lifeline.org/chat/)\n"
+            "• 📱 **Crisis Text Line**: Text **HOME** to **741741** to connect with a crisis counselor\n"
+            "• 🌍 **International Crisis Resources**: Find a 24/7 hotline in your country at [https://findahelpline.com/](https://findahelpline.com/)\n"
+            "• 🚑 **Medical Emergencies**: Please call **911** or go to your nearest hospital emergency room immediately."
+        )
+        return ToolResult(
+            success=True,
+            tool_name=self.name,
+            message=message,
+            data={
+                "tool": "Crisis Hotline",
+                "phone": "988",
+                "text_line": "741741",
+                "web_chat": "https://988lifeline.org/chat/",
+                "international_url": "https://findahelpline.com/",
+            },
+        )

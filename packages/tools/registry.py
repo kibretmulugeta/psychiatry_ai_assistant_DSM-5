@@ -7,6 +7,7 @@ from packages.tools.base import BaseTool, ToolResult
 from packages.tools.psychiatric_tools import (
     ClinicalSummaryReportTool,
     DSM5CodeLookupTool,
+    EmergencyCrisisTool,
     EpidemiologyStatsTool,
     GAD7AssessmentTool,
     PCL5AssessmentTool,
@@ -30,6 +31,7 @@ class ToolRegistry:
             DSM5CodeLookupTool(),
             EpidemiologyStatsTool(),
             ClinicalSummaryReportTool(),
+            EmergencyCrisisTool(),
         ]
         for t in tools:
             self._tools[t.name] = t

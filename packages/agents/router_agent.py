@@ -20,14 +20,14 @@ class RouterAgent(BaseAgent):
         crisis_keywords = [
             "suicide", "suicidal", "kill myself", "end my life", "want to die",
             "self harm", "self-harm", "cutting myself", "overdose", "hurt myself",
-            "hanging myself", "no reason to live"
+            "hanging myself", "no reason to live", "crisis", "hotline", "helpline", "988"
         ]
         if any(w in text_lower for w in crisis_keywords):
             return AgentDecision(
                 route="CRISIS_SAFETY_INTERVENTION",
                 confidence=1.0,
-                reasoning="Safety override: Suicidal ideation or self-harm keyword detected.",
-                action_name=None,
+                reasoning="Safety override: Emergency crisis or safety support requested.",
+                action_name="crisis_hotline",
             )
 
         # Priority 2: Psychometric Screening Tools
