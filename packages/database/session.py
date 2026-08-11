@@ -39,13 +39,16 @@ if "postgresql" in db_url and ("pooler.supabase.com" in db_url or ":6543" in db_
     connect_args["statement_cache_size"] = 0
     connect_args["prepared_statement_cache_size"] = 0
 
-engine: AsyncEngine = create_async_engine(
-    db_url,
-    echo=settings.DEBUG,
-    future=True,
-    pool_pre_ping=True if "sqlite" not in db_url else False,
-    connect_args=connect_args,
-)
+try:
+    engine: AsyncEngine = create_async_engine(
+        db_url,
+        echo=settings.DEBUG,
+        future=True,
+        pool_pre_ping=True if "sqlite" not in db_url else False,
+        connect_args=connect_args,
+    )
+except Exception:
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", future=True)
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
