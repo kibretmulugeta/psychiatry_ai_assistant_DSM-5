@@ -24,19 +24,7 @@ class EmbeddingFactory:
         Returns:
             BaseEmbeddingProvider instance.
         """
-        provider = (provider_name or settings.ACTIVE_EMBEDDING_PROVIDER).lower()
-
-        if provider == "openai":
-            return OpenAIEmbeddingProvider(
-                api_key=settings.OPENAI_API_KEY or "",
-                dimension=settings.EMBEDDING_DIMENSION,
-            )
-        elif provider in ["bge", "e5", "sentence_transformers"]:
-            return SentenceTransformerEmbeddingProvider(
-                dimension=settings.EMBEDDING_DIMENSION,
-            )
-        else:
-            return OpenAIEmbeddingProvider(
-                api_key=settings.OPENAI_API_KEY or "",
-                dimension=settings.EMBEDDING_DIMENSION,
-            )
+        return OpenAIEmbeddingProvider(
+            api_key=settings.OPENAI_API_KEY or "",
+            dimension=settings.EMBEDDING_DIMENSION,
+        )
