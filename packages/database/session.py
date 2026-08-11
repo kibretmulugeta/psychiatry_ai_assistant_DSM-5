@@ -34,11 +34,17 @@ except ImportError:
     if "sqlite" not in db_url:
         db_url = "sqlite+aiosqlite:///:memory:"
 
+connect_args = {}
+if "postgresql" in db_url and ("pooler.supabase.com" in db_url or ":6543" in db_url):
+    connect_args["statement_cache_size"] = 0
+    connect_args["prepared_statement_cache_size"] = 0
+
 engine: AsyncEngine = create_async_engine(
     db_url,
     echo=settings.DEBUG,
     future=True,
     pool_pre_ping=True if "sqlite" not in db_url else False,
+    connect_args=connect_args,
 )
 
 AsyncSessionLocal = async_sessionmaker(

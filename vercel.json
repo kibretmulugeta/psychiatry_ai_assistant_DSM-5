@@ -6,7 +6,11 @@
       "use": "@vercel/python",
       "config": {
         "maxDuration": 60,
-        "includeFiles": "{apps/**,packages/**,knowledge_base.sqlite}"
+        "includeFiles": [
+          "apps/**",
+          "packages/**",
+          "knowledge_base.sqlite"
+        ]
       }
     }
   ],
