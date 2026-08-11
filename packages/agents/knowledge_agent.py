@@ -38,9 +38,10 @@ class KnowledgeAgent(BaseAgent):
 
         if session and not retrieved_context:
             try:
+                import asyncio
                 embedding_provider = EmbeddingFactory.get_provider()
                 pipeline = RetrievalPipeline(session=session, embedding_provider=embedding_provider)
-                ret_res = await pipeline.retrieve_context(query=input_text, top_k=5)
+                ret_res = await asyncio.wait_for(pipeline.retrieve_context(query=input_text, top_k=5), timeout=2.5)
                 retrieved_context = ret_res.context_text
                 sources = ret_res.sources
             except Exception:
@@ -72,9 +73,10 @@ class KnowledgeAgent(BaseAgent):
         retrieved_context = context or ""
         if session and not retrieved_context:
             try:
+                import asyncio
                 embedding_provider = EmbeddingFactory.get_provider()
                 pipeline = RetrievalPipeline(session=session, embedding_provider=embedding_provider)
-                ret_res = await pipeline.retrieve_context(query=input_text, top_k=5)
+                ret_res = await asyncio.wait_for(pipeline.retrieve_context(query=input_text, top_k=5), timeout=2.5)
                 retrieved_context = ret_res.context_text
             except Exception:
                 retrieved_context = ""
