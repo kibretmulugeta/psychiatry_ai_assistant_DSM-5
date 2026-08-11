@@ -17,17 +17,23 @@ class PHQ9AssessmentTool(BaseTool):
         )
 
     async def execute(self, scores: Optional[List[int]] = None, total_score: Optional[int] = None, **kwargs: Any) -> ToolResult:
+        import re
         if scores is not None:
             total = sum(scores)
         elif total_score is not None:
             total = total_score
         else:
-            return ToolResult(
-                success=False,
-                tool_name=self.name,
-                message="Error: Either 'scores' list (9 items, values 0-3) or 'total_score' (0-27) must be provided.",
-                data={},
-            )
+            # Check for numbers in kwargs or input_text string
+            found = re.findall(r'\b([0-9]|1[0-9]|2[0-7])\b', str(kwargs))
+            if found:
+                total = int(found[0])
+            else:
+                return ToolResult(
+                    success=False,
+                    tool_name=self.name,
+                    message="To evaluate your PHQ-9 score, please provide a total score from 0 to 27 (for example: 'My PHQ-9 score is 12').",
+                    data={},
+                )
 
         if total < 0 or total > 27:
             return ToolResult(
