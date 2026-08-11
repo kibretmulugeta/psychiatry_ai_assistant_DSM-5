@@ -67,13 +67,17 @@ class RouterAgent(BaseAgent):
                 action_name="get_epidemiology_stats",
             )
 
-        # Fallback to LLM classification
+        # Fallback to LLM classification with fast 1.5s timeout
         try:
+            import asyncio
             messages = [
                 LLMMessage(role="system", content=ROUTER_INTENT_SYSTEM_PROMPT),
                 LLMMessage(role="user", content=input_text),
             ]
-            response = await self.llm_adapter.generate(messages=messages, temperature=0.1)
+            response = await asyncio.wait_for(
+                self.llm_adapter.generate(messages=messages, temperature=0.1),
+                timeout=1.5,
+            )
             raw_content = response.content.strip()
 
             # Strip possible markdown code fence
